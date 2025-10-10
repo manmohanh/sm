@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import "animate.css";
 import "remixicon/fonts/remixicon.css";
 import Home from "./components/Home";
@@ -12,23 +12,37 @@ import Video from "./components/app/Video";
 import Audio from "./components/app/Audio";
 import Chat from "./components/app/Chat";
 import NotFound from "./components/NotFound";
+import { ToastContainer } from "react-toastify";
+import PrivateRoute from "./PrivateRoute";
+import Context from "./Context";
+import { useState } from "react";
 
 function App() {
+  const [session, setSession] = useState(null);
+
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/app" element={<Layout />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="my-posts" element={<Post />} />
-        <Route path="friends" element={<Friends />} />
-        <Route path="video-chat" element={<Video />} />
-        <Route path="audio-chat" element={<Audio />} />
-        <Route path="chat" element={<Chat />} />
-      </Route>
-      <Route path="*" element={<NotFound/>}/>
-    </Routes>
+    <Context.Provider value={{ session, setSession }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          <Route element={<PrivateRoute />}>
+            <Route path="/app" element={<Layout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="my-posts" element={<Post />} />
+              <Route path="friends" element={<Friends />} />
+              <Route path="video-chat" element={<Video />} />
+              <Route path="audio-chat" element={<Audio />} />
+              <Route path="chat" element={<Chat />} />
+            </Route>
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <ToastContainer />
+      </BrowserRouter>
+    </Context.Provider>
   );
 }
 
