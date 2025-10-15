@@ -1,8 +1,13 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 
+
 const userSchema = new Schema(
   {
+    image: {
+      type: String,
+      default: null,
+    },
     fullname: {
       type: String,
       required: true,
@@ -26,6 +31,12 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
+    refreshToken: {
+      type: String,
+    },
+    expiry: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
@@ -33,6 +44,12 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password.toString(), 12);
   next();
+});
+
+userSchema.pre("save", async function (next) {
+  this.refreshToken = null
+  this.expiry = null
+  next()
 });
 
 const UserModel = model("User", userSchema);

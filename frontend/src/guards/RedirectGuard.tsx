@@ -1,9 +1,9 @@
 import { useContext, useEffect } from "react";
 import { Outlet, Navigate } from "react-router-dom";
-import HttpInterceptor from "./lib/HttpInterceptor";
-import Context from "./Context";
+import HttpInterceptor from "../lib/HttpInterceptor";
+import Context from "../Context";
 
-const PrivateRoute = () => {
+const RedirectGuard = () => {
   const { session, setSession } = useContext(Context);
 
   useEffect(() => {
@@ -22,9 +22,9 @@ const PrivateRoute = () => {
 
   if (session === null) return "Loading...";
 
-  if (session === false) return <Navigate to="/login" />;
+  if (session === false) return <Outlet/>
 
-  return <Outlet />;
+  return <Navigate to="/app"/>
 };
 
-export default PrivateRoute;
+export default RedirectGuard;

@@ -8,9 +8,11 @@ interface AvatarInterface {
   subtitleColor?: string;
   size?: "lg" | "md";
   key?: string | number;
+  onClick?:()=>void
 }
 
 const Avatar: FC<AvatarInterface> = ({
+  onClick,
   key = 0,
   size = "lg",
   title,
@@ -23,6 +25,7 @@ const Avatar: FC<AvatarInterface> = ({
     <div key={key} className="flex gap-3 items-center">
       {image && (
         <img
+        onClick={onClick}
           src={image}
           alt="Profile"
           className={`${

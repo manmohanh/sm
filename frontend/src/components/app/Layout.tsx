@@ -1,10 +1,20 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+import { Link, Outlet, useLocation,useNavigate } from "react-router-dom";
 import Avatar from "../shared/Avatar";
 import Card from "../shared/Card";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Dashboard from "./Dashboard";
+import Context from "../../Context";
+import HttpInterceptor from "../../lib/HttpInterceptor";
+import { v4 as uuid } from "uuid";
+import useSWR, { mutate } from "swr";
+import Fetcher from "../../lib/Fetcher";
+import CatchError from "../../lib/CatchError";
+
+const EightMinutesInMs = 8 * 60 * 1000;
 
 const Layout = () => {
+  const navigate = useNavigate()
   const { pathname } = useLocation();
   const [LeftAsideSize, setLeftAsideSize] = useState(350);
   const RightAsideSize = 450;
@@ -13,6 +23,27 @@ const Layout = () => {
   //   width: `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
   //   marginLeft: LeftAsideSize,
   // };
+  const {error} = useSWR("/auth/refresh-token", Fetcher, {
+    refreshInterval: EightMinutesInMs,
+    shouldRetryOnError:false
+  });
+  const { session, setSession } = useContext(Context);
+
+  useEffect(()=>{
+    if(error){
+      logout()
+    }
+  },[error])
+
+  const logout = async () => {
+    try {
+      const {data} = await HttpInterceptor.post("/auth/logout")
+      navigate("/login")
+    } catch (error) {
+      CatchError(error)
+    }
+  }
+
 
   const getPathname = (path: string) => {
     return path.split("/").pop()?.split("-").join(" ");
@@ -35,6 +66,39 @@ const Layout = () => {
     },
   ];
 
+  const uploadImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.click();
+    input.onchange = async () => {
+      if (!input.files) return;
+      const file = input.files[0];
+      const path = `profile-pictures/${uuid()}.png`;
+      const payload = {
+        path,
+        type: file.type,
+      };
+      try {
+        const options = {
+          headers: {
+            "Content-Type": file.type,
+          },
+        };
+        const { data } = await HttpInterceptor.post("/storage/upload", payload);
+        await HttpInterceptor.put(data.url, file, options);
+        const {data:user} = await HttpInterceptor.put(
+          "/auth/profile-picture",
+          { path }
+        );
+        setSession({...session,image:user.image})
+        mutate("/auth/refresh-token")
+      } catch (error: unknown) {
+        console.log(error);
+      }
+    };
+  };
+
   return (
     <div className="min-h-screen">
       <aside
@@ -46,12 +110,15 @@ const Layout = () => {
             <i className="ri-user-line text-xl text-gray-300 hover:text-white animate__animated animate__fadeIn"></i>
           ) : (
             <div className="animate__animated animate__fadeIn">
-              <Avatar
-                title="Manmohan"
-                subtitle="Developer"
-                image="/images/profile.jpg"
-                titleColor="white"
-              />
+              {session && (
+                <Avatar
+                  title={session.fullname}
+                  subtitle={session.email}
+                  image={session.image || "/images/profile.jpg"}
+                  titleColor="white"
+                  onClick={uploadImage}
+                />
+              )}
             </div>
           )}
 
@@ -73,7 +140,7 @@ const Layout = () => {
               </Link>
             ))}
 
-            <button className="flex items-center gap-2 text-gray-300 py-3 hover:text-white">
+            <button onClick={logout} className="flex items-center gap-2 text-gray-300 py-3 hover:text-white">
               <i className="ri-logout-circle-r-line text-xl" title="Logout"></i>
               <label
                 className={`${

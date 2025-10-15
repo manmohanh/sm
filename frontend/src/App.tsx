@@ -13,9 +13,10 @@ import Audio from "./components/app/Audio";
 import Chat from "./components/app/Chat";
 import NotFound from "./components/NotFound";
 import { ToastContainer } from "react-toastify";
-import PrivateRoute from "./PrivateRoute";
+import PrivateRoute from "./guards/PrivateRoute";
 import Context from "./Context";
 import { useState } from "react";
+import RedirectGuard from "./guards/RedirectGuard";
 
 function App() {
   const [session, setSession] = useState(null);
@@ -25,8 +26,10 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route element={<RedirectGuard/>}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          </Route>
 
           <Route element={<PrivateRoute />}>
             <Route path="/app" element={<Layout />}>

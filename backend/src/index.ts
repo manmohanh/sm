@@ -15,6 +15,9 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routers/auth.router";
+import storageRouter from "./routers/storage.router";
+import AuthMiddleware from "./middlewares/auth.middleware";
+import friendRouter from "./routers/friend.router"
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -30,6 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
+app.use("/storage",AuthMiddleware,storageRouter)
+app.use("/friend",AuthMiddleware,friendRouter)
 
 app.listen(port, () => {
   console.log(`Server is running on port:${port}`);
