@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { Link, Outlet, useLocation,useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Avatar from "../shared/Avatar";
 import Card from "../shared/Card";
 import { useContext, useEffect, useState } from "react";
@@ -10,11 +10,13 @@ import { v4 as uuid } from "uuid";
 import useSWR, { mutate } from "swr";
 import Fetcher from "../../lib/Fetcher";
 import CatchError from "../../lib/CatchError";
+import FriendsSuggestion from "./friend/FriendsSuggestion";
+import FriendsRequest from "./friend/FriendsRequest";
 
 const EightMinutesInMs = 8 * 60 * 1000;
 
 const Layout = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const [LeftAsideSize, setLeftAsideSize] = useState(350);
   const RightAsideSize = 450;
@@ -23,27 +25,35 @@ const Layout = () => {
   //   width: `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
   //   marginLeft: LeftAsideSize,
   // };
-  const {error} = useSWR("/auth/refresh-token", Fetcher, {
+  const { error } = useSWR("/auth/refresh-token", Fetcher, {
     refreshInterval: EightMinutesInMs,
-    shouldRetryOnError:false
+    shouldRetryOnError: false,
   });
   const { session, setSession } = useContext(Context);
 
-  useEffect(()=>{
-    if(error){
-      logout()
+  const friendsUiBlackList = [
+    "/app/friends",
+    "/app/chat",
+    "/app/audio-chat",
+    "/app/video-chat",
+  ];
+
+  const isBlacklisted = friendsUiBlackList.some((path) => path === pathname);
+
+  useEffect(() => {
+    if (error) {
+      logout();
     }
-  },[error])
+  }, [error]);
 
   const logout = async () => {
     try {
-      const {data} = await HttpInterceptor.post("/auth/logout")
-      navigate("/login")
+      await HttpInterceptor.post("/auth/logout");
+      navigate("/login");
     } catch (error) {
-      CatchError(error)
+      CatchError(error);
     }
-  }
-
+  };
 
   const getPathname = (path: string) => {
     return path.split("/").pop()?.split("-").join(" ");
@@ -78,6 +88,7 @@ const Layout = () => {
       const payload = {
         path,
         type: file.type,
+        status: "public-read",
       };
       try {
         const options = {
@@ -87,12 +98,12 @@ const Layout = () => {
         };
         const { data } = await HttpInterceptor.post("/storage/upload", payload);
         await HttpInterceptor.put(data.url, file, options);
-        const {data:user} = await HttpInterceptor.put(
+        const { data: user } = await HttpInterceptor.put(
           "/auth/profile-picture",
           { path }
         );
-        setSession({...session,image:user.image})
-        mutate("/auth/refresh-token")
+        setSession({ ...session, image: user.image });
+        mutate("/auth/refresh-token");
       } catch (error: unknown) {
         console.log(error);
       }
@@ -140,7 +151,10 @@ const Layout = () => {
               </Link>
             ))}
 
-            <button onClick={logout} className="flex items-center gap-2 text-gray-300 py-3 hover:text-white">
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 text-gray-300 py-3 hover:text-white"
+            >
               <i className="ri-logout-circle-r-line text-xl" title="Logout"></i>
               <label
                 className={`${
@@ -155,13 +169,14 @@ const Layout = () => {
       </aside>
 
       <section
-        className="py-8 px-1"
+        className="py-8 px-1 space-y-8"
         style={{
           width: `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
           marginLeft: LeftAsideSize,
           transition: "0.3s",
         }}
       >
+        {!isBlacklisted && <FriendsRequest />}
         <Card
           title={
             <div className="flex items-center gap-4">
@@ -180,36 +195,13 @@ const Layout = () => {
         >
           {pathname === "/app" ? <Dashboard /> : <Outlet />}
         </Card>
+        {!isBlacklisted && <FriendsSuggestion />}
       </section>
 
       <aside
         className="bg-white fixed top-0 right-0 h-full p-8 overflow-auto space-y-8"
         style={{ width: RightAsideSize }}
       >
-        <div className="h-[250px] overflow-auto">
-          <Card title="Suggested" divider>
-            <div className="space-y-8">
-              {Array(24)
-                .fill(0)
-                .map((item, index) => (
-                  <div key={index} className="flex gap-4">
-                    <img
-                      src="/images/profile.jpg"
-                      alt="profile"
-                      className="w-16 h-16 rounded object-cover"
-                    />
-                    <div>
-                      <h1 className="text-black font-medium">Rahul Kumar</h1>
-                      <button className="bg-blue-500 text-white rounded px-2 py-1 text-xs hover:bg-blue-600 mt-1">
-                        <i className="ri-user-add-line mr-1"></i>
-                        Add Friend
-                      </button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </Card>
-        </div>
         <Card title="My Friends" divider>
           <div className="space-y-5">
             {Array(20)

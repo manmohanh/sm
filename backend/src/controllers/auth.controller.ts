@@ -57,7 +57,7 @@ export const login = async (req: Request, res: Response) => {
     const isMatched = await bcrypt.compare(password, user.password);
     if (!isMatched) throw TryError("Invalid email or password", 401);
 
-    const image = user.image ? await downloadObject(user.image) : null;
+    const image = user.image;
     const payload = {
       id: user._id,
       fullname: user.fullname,
@@ -89,9 +89,7 @@ export const refreshToken = async (req: SessionInterface, res: Response) => {
   try {
     if (!req.session) throw TryError("Failed to refresh token", 401);
 
-    req.session.image = req.session.image
-      ? await downloadObject(req.session.image)
-      : null;
+  
     const { accessToken, refreshToken } = generateToken(req.session);
     await UserModel.updateOne(
       { _id: req.session.id },
@@ -127,7 +125,7 @@ export const updateProfilePicture = async (
   res: Response
 ) => {
   try {
-    const path = req.body.path;
+    const path = `${process.env.S3_URL}/${req.body.path}`;
     if (!path || !req.session)
       throw TryError("Failed to update profile picture", 400);
 
@@ -136,9 +134,8 @@ export const updateProfilePicture = async (
       { $set: { image: path } }
     );
 
-    const url = await downloadObject(path);
-
-    res.json({ image: url });
+    
+    res.json({ image: path });
   } catch (error) {
     catchError(error, res, "Failed to update Profile picture");
   }

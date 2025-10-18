@@ -6,7 +6,7 @@ import IconButton from "../shared/IconButton";
 const Post = () => {
   return (
     <div className="space-y-8">
-      {Array(20)
+      {Array(5)
         .fill(0)
         .map((item, index) => (
           <Card key={index}>

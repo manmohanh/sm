@@ -28,6 +28,7 @@ interface ButtonInterface {
     | "info";
   onClick?: () => void;
   icon?: string;
+  loading?:boolean
 }
 
 const Button: FC<ButtonInterface> = ({
@@ -35,7 +36,17 @@ const Button: FC<ButtonInterface> = ({
   type = "primary",
   onClick,
   icon,
+  loading = false
 }) => {
+
+  if(loading)
+    return (
+      <button disabled className="text-gray-400">
+        <i className="fa fa-spinner fa-spin mr-2 "></i>
+        Loading...
+        </button>
+  )
+
   return (
     <button className={ButtonModel[type]} onClick={onClick}>
       {icon && <i className={`ri-${icon} mr-1`}></i>}

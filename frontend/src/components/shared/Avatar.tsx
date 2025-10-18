@@ -37,7 +37,7 @@ const Avatar: FC<AvatarInterface> = ({
       {title && subtitle && (
         <div className="flex flex-col">
           <h1
-            className={`${size === "lg" ? "text-lg/6" : "text-sm"} font-medium`}
+            className={`${size === "lg" ? "text-lg/6" : "text-sm"} font-medium capitalize`}
             style={{ color: titleColor }}
           >
             {title}

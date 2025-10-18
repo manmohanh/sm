@@ -9,6 +9,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 export const bucket = process.env.S3_BUCKET;
 export const region = process.env.REGION;
 
+type ACLType = "private" | "public-read";
+
 const conn = new S3Client({
   region: region,
   endpoint: `https://s3-${region}.amazonaws.com`,
@@ -40,11 +42,16 @@ export const downloadObject = async (path: string, expiry: number = 60) => {
   return url;
 };
 
-export const uploadObject = async (path: string, type: string) => {
+export const uploadObject = async (
+  path: string,
+  type: string,
+  acl: ACLType = "private"
+) => {
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: path,
     ContentType: type,
+    ACL: acl,
   });
   const url = await getSignedUrl(conn, command, { expiresIn: 60 });
   return url;
