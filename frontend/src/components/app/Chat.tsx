@@ -1,8 +1,14 @@
+import { useEffect } from "react";
+import socket from "../../lib/socket";
 import Avatar from "../shared/Avatar";
 import Button from "../shared/Button";
 import Input from "../shared/Input";
 
 const Chat = () => {
+
+
+
+
   return (
     <div>
       <div className="h-[500px] overflow-auto space-y-12">

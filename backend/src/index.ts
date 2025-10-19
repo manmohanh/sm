@@ -12,33 +12,38 @@ mongoose
   });
 
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routers/auth.router";
 import storageRouter from "./routers/storage.router";
 import AuthMiddleware from "./middlewares/auth.middleware";
-import friendRouter from "./routers/friend.router"
+import friendRouter from "./routers/friend.router";
 import SwaggerConfig from "./utils/swagger";
 import { serve, setup } from "swagger-ui-express";
+import StatusSocket from "./socket/status.socket";
+import corsConfig from "./utils/cors";
 
 const app = express();
-const port = process.env.PORT || 8080;
+const server = createServer(app);
+const io = new Server(server, { cors: corsConfig });
 
-app.use(
-  cors({
-    origin: process.env.CLIENT,
-    credentials: true,
-  })
-);
+StatusSocket(io);
+
+//Middlwares
+app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/api-docs",serve,setup(SwaggerConfig))
+// Endpoints
+app.use("/api-docs", serve, setup(SwaggerConfig));
 app.use("/auth", authRouter);
-app.use("/storage",AuthMiddleware,storageRouter)
-app.use("/friend",AuthMiddleware,friendRouter)
+app.use("/storage", AuthMiddleware, storageRouter);
+app.use("/friend", AuthMiddleware, friendRouter);
 
-app.listen(port, () => {
+const port = process.env.PORT || 8080;
+server.listen(port, () => {
   console.log(`Server is running on port:${port}`);
 });

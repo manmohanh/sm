@@ -7,28 +7,34 @@ import Dashboard from "./Dashboard";
 import Context from "../../Context";
 import HttpInterceptor from "../../lib/HttpInterceptor";
 import { v4 as uuid } from "uuid";
+import { useMediaQuery } from "react-responsive";
 import useSWR, { mutate } from "swr";
 import Fetcher from "../../lib/Fetcher";
 import CatchError from "../../lib/CatchError";
 import FriendsSuggestion from "./friend/FriendsSuggestion";
 import FriendsRequest from "./friend/FriendsRequest";
+import FriendsList from "./friend/FriendsList";
+import Logo from "../shared/Logo";
+import IconButton from "../shared/IconButton";
+import FriendsOnline from "./friend/FriendsOnline";
 
 const EightMinutesInMs = 8 * 60 * 1000;
 
 const Layout = () => {
+  const isMobile = useMediaQuery({ query: "(max-width: 1224px)" });
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [LeftAsideSize, setLeftAsideSize] = useState(350);
+  const [LeftAsideSize, setLeftAsideSize] = useState(0);
   const RightAsideSize = 450;
-  const collapseSize = 140;
+  const [collapseSize, setCollapseSize] = useState(0);
   // const sectionDimension = {
   //   width: `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
   //   marginLeft: LeftAsideSize,
   // };
-  const { error } = useSWR("/auth/refresh-token", Fetcher, {
-    refreshInterval: EightMinutesInMs,
-    shouldRetryOnError: false,
-  });
+  // const { error } = useSWR("/auth/refresh-token", Fetcher, {
+  //   refreshInterval: EightMinutesInMs,
+  //   shouldRetryOnError: false,
+  // });
   const { session, setSession } = useContext(Context);
 
   const friendsUiBlackList = [
@@ -40,11 +46,16 @@ const Layout = () => {
 
   const isBlacklisted = friendsUiBlackList.some((path) => path === pathname);
 
+  // useEffect(() => {
+  //   if (error) {
+  //     logout();
+  //   }
+  // }, [error]);
+
   useEffect(() => {
-    if (error) {
-      logout();
-    }
-  }, [error]);
+    setLeftAsideSize(isMobile ? 0 : 350);
+    setCollapseSize(isMobile ? 0 : 140);
+  }, [isMobile]);
 
   const logout = async () => {
     try {
@@ -112,11 +123,32 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen">
+      <nav className="lg:hidden flex items-center justify-between bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900 fixed top-0 left-0 z-[20000] w-full py-4 px-6 ">
+        <Logo />
+        <div className="flex gap-3">
+          <IconButton
+            onClick={logout}
+            icon="logout-circle-line"
+            type="secondary"
+          />
+          <Link to={"/app/friends"}>
+            <IconButton icon="chat-ai-line" type="danger" />
+          </Link>
+          <IconButton
+            onClick={() =>
+              setLeftAsideSize(LeftAsideSize === 0 ? 250 : collapseSize)
+            }
+            icon="menu-3-line"
+            type="warning"
+          />
+        </div>
+      </nav>
+
       <aside
-        className="bg-white fixed top-0 left-0 h-full p-8"
+        className=" bg-white fixed top-0 left-0 h-full lg:p-8 z-[20000]"
         style={{ width: LeftAsideSize, transition: "0.2s" }}
       >
-        <div className="space-y-8 p-8 h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900">
+        <div className="space-y-8 p-8 h-full lg:rounded-2xl bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900">
           {LeftAsideSize === collapseSize ? (
             <i className="ri-user-line text-xl text-gray-300 hover:text-white animate__animated animate__fadeIn"></i>
           ) : (
@@ -169,10 +201,12 @@ const Layout = () => {
       </aside>
 
       <section
-        className="py-8 px-1 space-y-8"
+        className="lg:py-8 lg:px-1 p-4 space-y-8 mt-16 lg:mt-0"
         style={{
-          width: `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
-          marginLeft: LeftAsideSize,
+          width: isMobile
+            ? "100%"
+            : `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
+          marginLeft: isMobile ? 0 : LeftAsideSize,
           transition: "0.3s",
         }}
       >
@@ -181,7 +215,7 @@ const Layout = () => {
           title={
             <div className="flex items-center gap-4">
               <button
-                className="bg-gray-100 h-10 w-10 rounded-full hover:bg-slate-200"
+                className="lg:block hidden bg-gray-100 h-10 w-10 rounded-full hover:bg-slate-200"
                 onClick={() =>
                   setLeftAsideSize(LeftAsideSize === 350 ? collapseSize : 350)
                 }
@@ -199,65 +233,10 @@ const Layout = () => {
       </section>
 
       <aside
-        className="bg-white fixed top-0 right-0 h-full p-8 overflow-auto space-y-8"
-        style={{ width: RightAsideSize }}
+        className="lg:block hidden bg-white fixed top-0 right-0 h-full p-8 overflow-auto space-y-8"
+        style={{ width: RightAsideSize,transition:'0.2s' }}
       >
-        <Card title="My Friends" divider>
-          <div className="space-y-5">
-            {Array(20)
-              .fill(0)
-              .map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-100 p-3 rounded-lg flex justify-between"
-                >
-                  <Avatar
-                    size="md"
-                    image="/images/profile.jpg"
-                    title="Manmohan"
-                    subtitle={
-                      <small
-                        className={`${
-                          index % 2 === 0 ? "text-zinc-400" : "text-green-400"
-                        } font-medium`}
-                      >
-                        {index % 2 === 0 ? "Offline" : "Online"}
-                      </small>
-                    }
-                  />
-
-                  <div className="space-x-3">
-                    <Link to="/app/chat">
-                      <button
-                        className="hover:text-blue-500 hover:cursor-pointer"
-                        title="Chat"
-                      >
-                        <i className="ri-chat-ai-line"></i>
-                      </button>
-                    </Link>
-
-                    <Link to="/app/audio-chat">
-                      <button
-                        className="hover:text-blue-500 hover:cursor-pointer"
-                        title="Call"
-                      >
-                        <i className="ri-phone-line"></i>
-                      </button>
-                    </Link>
-
-                    <Link to="/app/video-chat">
-                      <button
-                        className="hover:text-blue-500 hover:cursor-pointer"
-                        title="Video Call"
-                      >
-                        <i className="ri-video-on-ai-line"></i>
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </Card>
+        <FriendsOnline/>
       </aside>
     </div>
   );
