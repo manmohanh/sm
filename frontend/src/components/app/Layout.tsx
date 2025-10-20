@@ -39,7 +39,7 @@ const Layout = () => {
 
   const friendsUiBlackList = [
     "/app/friends",
-    "/app/chat",
+    "/app/chat/id",
     "/app/audio-chat",
     "/app/video-chat",
   ];
@@ -210,7 +210,7 @@ const Layout = () => {
           transition: "0.3s",
         }}
       >
-        {!isBlacklisted && <FriendsRequest />}
+        {/* {!isBlacklisted && <FriendsRequest />} */}
         <Card
           title={
             <div className="flex items-center gap-4">
@@ -229,7 +229,7 @@ const Layout = () => {
         >
           {pathname === "/app" ? <Dashboard /> : <Outlet />}
         </Card>
-        {!isBlacklisted && <FriendsSuggestion />}
+        {/* {!isBlacklisted && <FriendsSuggestion />} */}
       </section>
 
       <aside

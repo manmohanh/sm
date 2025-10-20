@@ -15,7 +15,7 @@ const FriendsList: FC<FriendListInterface> = ({ gap = 8, columns = 3 }) => {
       {Array(12)
         .fill(0)
         .map((item, index) => (
-          <Card>
+          <Card key={index}>
             <div className="flex flex-col items-center gap-4 mt-3">
               <img
                 src="/images/profile.jpg"

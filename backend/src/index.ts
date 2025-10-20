@@ -24,12 +24,15 @@ import SwaggerConfig from "./utils/swagger";
 import { serve, setup } from "swagger-ui-express";
 import StatusSocket from "./socket/status.socket";
 import corsConfig from "./utils/cors";
+import ChatSocket from "./socket/chat.socket";
+import chatRouter from "./routers/chat.router";
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, { cors: corsConfig });
 
 StatusSocket(io);
+ChatSocket(io);
 
 //Middlwares
 app.use(cors(corsConfig));
@@ -42,6 +45,7 @@ app.use("/api-docs", serve, setup(SwaggerConfig));
 app.use("/auth", authRouter);
 app.use("/storage", AuthMiddleware, storageRouter);
 app.use("/friend", AuthMiddleware, friendRouter);
+app.use("/chat", chatRouter);
 
 const port = process.env.PORT || 8080;
 server.listen(port, () => {

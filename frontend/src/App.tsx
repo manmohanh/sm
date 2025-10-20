@@ -39,7 +39,7 @@ function App() {
               <Route path="friends" element={<FriendsList />} />
               <Route path="video-chat" element={<Video />} />
               <Route path="audio-chat" element={<Audio />} />
-              <Route path="chat" element={<Chat />} />
+              <Route path="chat/:id" element={<Chat />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

@@ -11,7 +11,7 @@ import {
 } from "../middlewares/auth.middleware";
 import { downloadObject } from "../utils/s3";
 
-const accessTokenExpiry = "10m";
+const accessTokenExpiry = "30m";
 const tenMinutesInMs = 7 * 1000 * 60 * 60 * 10;
 const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
 
