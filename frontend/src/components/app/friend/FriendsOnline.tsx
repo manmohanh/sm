@@ -45,7 +45,7 @@ const FriendsOnline = () => {
                   >
                     Online
                   </label>
-                  <Link to={`/app/chat/${item.id}`}>
+                  <Link to={`/app/chat/${item.id}`} target="_blank">
                     <IconButton icon="chat-ai-line" type="warning" />
                   </Link>
                   <Link to={"/app/audio-chat"}>

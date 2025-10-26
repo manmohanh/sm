@@ -11,9 +11,6 @@ import { useMediaQuery } from "react-responsive";
 import useSWR, { mutate } from "swr";
 import Fetcher from "../../lib/Fetcher";
 import CatchError from "../../lib/CatchError";
-import FriendsSuggestion from "./friend/FriendsSuggestion";
-import FriendsRequest from "./friend/FriendsRequest";
-import FriendsList from "./friend/FriendsList";
 import Logo from "../shared/Logo";
 import IconButton from "../shared/IconButton";
 import FriendsOnline from "./friend/FriendsOnline";
@@ -31,10 +28,10 @@ const Layout = () => {
   //   width: `calc(100% - ${LeftAsideSize + RightAsideSize}px)`,
   //   marginLeft: LeftAsideSize,
   // };
-  // const { error } = useSWR("/auth/refresh-token", Fetcher, {
-  //   refreshInterval: EightMinutesInMs,
-  //   shouldRetryOnError: false,
-  // });
+  const { error } = useSWR("/auth/refresh-token", Fetcher, {
+    refreshInterval: EightMinutesInMs,
+    shouldRetryOnError: false,
+  });
   const { session, setSession } = useContext(Context);
 
   const friendsUiBlackList = [

@@ -12,8 +12,8 @@ import {
 import { downloadObject } from "../utils/s3";
 
 const accessTokenExpiry = "30m";
-const tenMinutesInMs = 7 * 1000 * 60 * 60 * 10;
-const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+const tenMinutesInMs = 10 * 60 * 1000;
+const sevenDaysInMs = 60 * 60 * 24 * 7 * 1000;
 
 type TokenType = "at" | "rt";
 
@@ -89,7 +89,6 @@ export const refreshToken = async (req: SessionInterface, res: Response) => {
   try {
     if (!req.session) throw TryError("Failed to refresh token", 401);
 
-  
     const { accessToken, refreshToken } = generateToken(req.session);
     await UserModel.updateOne(
       { _id: req.session.id },
@@ -134,7 +133,6 @@ export const updateProfilePicture = async (
       { $set: { image: path } }
     );
 
-    
     res.json({ image: path });
   } catch (error) {
     catchError(error, res, "Failed to update Profile picture");
