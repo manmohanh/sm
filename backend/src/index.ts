@@ -26,6 +26,7 @@ import StatusSocket from "./socket/status.socket";
 import corsConfig from "./utils/cors";
 import ChatSocket from "./socket/chat.socket";
 import chatRouter from "./routers/chat.router";
+import VideoSocket from "./socket/video.socket";
 
 const app = express();
 const server = createServer(app);
@@ -33,6 +34,8 @@ const io = new Server(server, { cors: corsConfig });
 
 StatusSocket(io);
 ChatSocket(io);
+VideoSocket(io)
+
 
 //Middlwares
 app.use(cors(corsConfig));

@@ -48,10 +48,10 @@ const FriendsOnline = () => {
                   <Link to={`/app/chat/${item.id}`} target="_blank">
                     <IconButton icon="chat-ai-line" type="warning" />
                   </Link>
-                  <Link to={"/app/audio-chat"}>
+                  <Link to={`/app/audio-chat/${item.id}`}>
                     <IconButton icon="phone-line" type="success" />
                   </Link>
-                  <Link to={"/app/video-chat"}>
+                  <Link to={`/app/video-chat/${item.id}`}>
                     <IconButton icon="video-on-ai-line" type="danger" />
                   </Link>
                 </div>

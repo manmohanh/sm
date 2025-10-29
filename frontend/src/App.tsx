@@ -37,8 +37,8 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="my-posts" element={<Post />} />
               <Route path="friends" element={<FriendsList />} />
-              <Route path="video-chat" element={<Video />} />
-              <Route path="audio-chat" element={<Audio />} />
+              <Route path="video-chat/:id" element={<Video />} />
+              <Route path="audio-chat/:id" element={<Audio />} />
               <Route path="chat/:id" element={<Chat />} />
             </Route>
           </Route>
