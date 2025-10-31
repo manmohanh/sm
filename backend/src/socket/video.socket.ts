@@ -4,8 +4,8 @@ const VideoSocket = (io: Server) => {
   io.on("connection", (socket) => {
     console.log(`Connected user`);
 
-    socket.on("offer", ({ offer, to }) => {
-      io.to(to).emit("offer", { offer, from: socket.id });
+    socket.on("offer", ({ offer, to, from }) => {
+      io.to(to).emit("offer", { offer, from });
     });
 
     socket.on("candidate", ({ candidate, to }) => {
@@ -14,6 +14,10 @@ const VideoSocket = (io: Server) => {
 
     socket.on("answer", ({ answer, to }) => {
       io.to(to).emit("answer", { answer, from: socket.id });
+    });
+
+    socket.on("end", ({ to }) => {
+      io.to(to).emit("end", { from: socket.id });
     });
   });
 };

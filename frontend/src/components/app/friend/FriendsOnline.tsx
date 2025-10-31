@@ -3,25 +3,30 @@ import { useContext, useEffect, useState } from "react";
 import Card from "../../shared/Card";
 import socket from "../../../lib/socket";
 import Context from "../../../Context";
-import { Link } from "react-router-dom";
-import IconButton from "../../shared/IconButton";
+import { useNavigate } from "react-router-dom";
 
 const FriendsOnline = () => {
+  const navigate = useNavigate();
   const [onlineUsers, setOnlineUsers] = useState([]);
 
-  const { session } = useContext(Context);
+  const { session, setLiveActiveSession } = useContext(Context);
 
   const onlineHandler = (users: any) => {
     setOnlineUsers(users);
+  };
+
+  const generateActiveSession = (url: string, user: any) => {
+    setLiveActiveSession(user);
+    navigate(url);
   };
 
   useEffect(() => {
     socket.on("online", onlineHandler);
     socket.emit("get-online");
 
-    return ()=>{
-      socket.off("online",onlineHandler)
-    }
+    return () => {
+      socket.off("online", onlineHandler);
+    };
   }, []);
   return (
     <Card title="Online Friends">
@@ -45,15 +50,30 @@ const FriendsOnline = () => {
                   >
                     Online
                   </label>
-                  <Link to={`/app/chat/${item.id}`} target="_blank">
-                    <IconButton icon="chat-ai-line" type="warning" />
-                  </Link>
-                  <Link to={`/app/audio-chat/${item.id}`}>
-                    <IconButton icon="phone-line" type="success" />
-                  </Link>
-                  <Link to={`/app/video-chat/${item.id}`}>
-                    <IconButton icon="video-on-ai-line" type="danger" />
-                  </Link>
+                  <button
+                    className="hover:cursor-pointer"
+                    onClick={() =>
+                      generateActiveSession(`/app/chat/${item.id}`, item)
+                    }
+                  >
+                    <i className="ri-chat-ai-line text-rose-400"></i>
+                  </button>
+                  <button
+                    className="hover:cursor-pointer"
+                    onClick={() =>
+                      generateActiveSession(`/app/audio-chat/${item.id}`, item)
+                    }
+                  >
+                    <i className="ri-phone-line text-amber-400"></i>
+                  </button>
+                  <button
+                    className="hover:cursor-pointer"
+                    onClick={() =>
+                      generateActiveSession(`/app/video-chat/${item.id}`, item)
+                    }
+                  >
+                    <i className="ri-video-on-ai-line text-green-400"></i>
+                  </button>
                 </div>
               </div>
             </div>

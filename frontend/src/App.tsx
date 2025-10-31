@@ -1,7 +1,7 @@
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import "animate.css";
 import "remixicon/fonts/remixicon.css";
-import "font-awesome/css/font-awesome.min.css"
+import "font-awesome/css/font-awesome.min.css";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -21,15 +21,17 @@ import FriendsList from "./components/app/friend/FriendsList";
 
 function App() {
   const [session, setSession] = useState(null);
-
+  const [liveActiveSession, setLiveActiveSession] = useState(null);
   return (
-    <Context.Provider value={{ session, setSession }}>
+    <Context.Provider
+      value={{ session, setSession, liveActiveSession, setLiveActiveSession }}
+    >
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route element={<RedirectGuard/>}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route element={<RedirectGuard />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
           </Route>
 
           <Route element={<PrivateRoute />}>

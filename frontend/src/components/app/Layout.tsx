@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import Avatar from "../shared/Avatar";
 import Card from "../shared/Card";
 import { useContext, useEffect, useState } from "react";
@@ -20,7 +26,10 @@ const EightMinutesInMs = 8 * 60 * 1000;
 const Layout = () => {
   const isMobile = useMediaQuery({ query: "(max-width: 1224px)" });
   const navigate = useNavigate();
+  const { liveActiveSession } = useContext(Context);
   const { pathname } = useLocation();
+  const params = useParams();
+  const paramsArray = Object.keys(params);
   const [LeftAsideSize, setLeftAsideSize] = useState(0);
   const RightAsideSize = 450;
   const [collapseSize, setCollapseSize] = useState(0);
@@ -116,6 +125,29 @@ const Layout = () => {
         console.log(error);
       }
     };
+  };
+
+  const ActiveSessionUi = () => {
+    if (!liveActiveSession){
+      navigate("/app")
+      return;
+    }
+
+    return (
+      <div className="flex gap-3">
+        <img
+          src={liveActiveSession.image || "/image/profile.jpg"}
+          alt="profile"
+          className="w-12 h-12 rounded-full object-cover"
+        />
+        <div className="flex flex-col">
+          <h1 className="font-medium capitalize">
+            {liveActiveSession.fullname}
+          </h1>
+          <label className="text-xs text-green-400">Online</label>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -219,7 +251,13 @@ const Layout = () => {
               >
                 <i className="ri-arrow-left-line"></i>
               </button>
-              <h1>{getPathname(pathname)}</h1>
+              <h1>
+                {paramsArray.length === 0 ? (
+                  getPathname(pathname)
+                ) : (
+                  <ActiveSessionUi />
+                )}
+              </h1>
             </div>
           }
           divider
@@ -231,9 +269,9 @@ const Layout = () => {
 
       <aside
         className="lg:block hidden bg-white fixed top-0 right-0 h-full p-8 overflow-auto space-y-8"
-        style={{ width: RightAsideSize,transition:'0.2s' }}
+        style={{ width: RightAsideSize, transition: "0.2s" }}
       >
-        <FriendsOnline/>
+        <FriendsOnline />
       </aside>
     </div>
   );
