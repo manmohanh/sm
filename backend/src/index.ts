@@ -20,6 +20,8 @@ import authRouter from "./routers/auth.router";
 import storageRouter from "./routers/storage.router";
 import AuthMiddleware from "./middlewares/auth.middleware";
 import friendRouter from "./routers/friend.router";
+import paymentRouter from "./routers/payment.router"
+import postRouter from "./routers/post.router"
 import SwaggerConfig from "./utils/swagger";
 import { serve, setup } from "swagger-ui-express";
 import StatusSocket from "./socket/status.socket";
@@ -49,6 +51,8 @@ app.use("/auth", authRouter);
 app.use("/storage", AuthMiddleware, storageRouter);
 app.use("/friend", AuthMiddleware, friendRouter);
 app.use("/chat", chatRouter);
+app.use("/payment",paymentRouter)
+app.use("/post",AuthMiddleware,postRouter)
 
 const port = process.env.PORT || 8080;
 server.listen(port, () => {

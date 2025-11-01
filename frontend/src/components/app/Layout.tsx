@@ -20,13 +20,15 @@ import CatchError from "../../lib/CatchError";
 import Logo from "../shared/Logo";
 import IconButton from "../shared/IconButton";
 import FriendsOnline from "./friend/FriendsOnline";
+import socket from "../../lib/socket";
+import type { OnOfferInterface } from "./Video";
 
 const EightMinutesInMs = 8 * 60 * 1000;
 
 const Layout = () => {
   const isMobile = useMediaQuery({ query: "(max-width: 1224px)" });
   const navigate = useNavigate();
-  const { liveActiveSession } = useContext(Context);
+  const { liveActiveSession, setLiveActiveSession,setSdp } = useContext(Context);
   const { pathname } = useLocation();
   const params = useParams();
   const paramsArray = Object.keys(params);
@@ -52,11 +54,24 @@ const Layout = () => {
 
   const isBlacklisted = friendsUiBlackList.some((path) => path === pathname);
 
+  const onOffer = (payload: OnOfferInterface) => {
+    setSdp(payload)
+    setLiveActiveSession(payload.from)
+    navigate(`/app/video-chat/${payload.from.socketId}`);
+  };
+
   // useEffect(() => {
   //   if (error) {
   //     logout();
   //   }
   // }, [error]);
+
+  useEffect(() => {
+    socket.on("offer", onOffer);
+    return () => {
+      socket.off("offer", onOffer);
+    };
+  }, []);
 
   useEffect(() => {
     setLeftAsideSize(isMobile ? 0 : 350);
@@ -128,8 +143,8 @@ const Layout = () => {
   };
 
   const ActiveSessionUi = () => {
-    if (!liveActiveSession){
-      navigate("/app")
+    if (!liveActiveSession) {
+      navigate("/app");
       return;
     }
 

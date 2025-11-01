@@ -22,9 +22,10 @@ import FriendsList from "./components/app/friend/FriendsList";
 function App() {
   const [session, setSession] = useState(null);
   const [liveActiveSession, setLiveActiveSession] = useState(null);
+  const [sdp,setSdp] = useState(null)
   return (
     <Context.Provider
-      value={{ session, setSession, liveActiveSession, setLiveActiveSession }}
+      value={{ session, setSession, liveActiveSession, setLiveActiveSession,sdp,setSdp }}
     >
       <BrowserRouter>
         <Routes>

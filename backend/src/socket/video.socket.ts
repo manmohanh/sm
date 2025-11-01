@@ -5,6 +5,7 @@ const VideoSocket = (io: Server) => {
     console.log(`Connected user`);
 
     socket.on("offer", ({ offer, to, from }) => {
+      from.socketId = socket.id
       io.to(to).emit("offer", { offer, from });
     });
 

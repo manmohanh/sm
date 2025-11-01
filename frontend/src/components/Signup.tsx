@@ -23,6 +23,7 @@ const Signup = () => {
         <Card noPadding>
           <div className="grid grid-cols-2">
             <div className="p-8 space-y-6">
+              
               <div>
                 <h1 className="text-xl font-bold text-black">SIGN UP</h1>
                 <p className="text-gray-500">Start your first chat now!</p>

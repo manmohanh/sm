@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-
 .swiper {
   width: 100%;
   height: 100%;
@@ -15,3 +14,10 @@
   align-items: center;
 }
 
+.hard-reset p,
+.hard-reset h2,
+.hard-reset h3,
+.hard-reset h4
+{
+  all:revert
+}

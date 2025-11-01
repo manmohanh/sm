@@ -4,16 +4,15 @@ import Button from "../shared/Button";
 import Context from "../../Context";
 import { toast } from "react-toastify";
 import socket from "../../lib/socket";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Modal, notification } from "antd";
 import "@ant-design/v5-patch-for-react-19";
-import HttpInterceptor from "../../lib/HttpInterceptor";
 
 const config = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
-interface OnOfferInterface {
+export interface OnOfferInterface {
   offer: RTCSessionDescriptionInit;
   from: any;
 }
@@ -48,7 +47,7 @@ function getCallTiming(seconds: number): string {
 const Video = () => {
   const navigate = useNavigate();
 
-  const { session,liveActiveSession } = useContext(Context);
+  const { session, liveActiveSession,setSdp,sdp } = useContext(Context);
   const { id } = useParams();
   const [notify, notifyUi] = notification.useNotification();
 
@@ -98,9 +97,37 @@ const Video = () => {
           video: true,
         });
 
+        const screenShareTrack = stream.getVideoTracks()[0];
+        const senderVideoTrack = rtc.current
+          ?.getSenders()
+          .find((s) => s.track?.kind === "video");
+
+        if (senderVideoTrack && screenShareTrack) {
+          await senderVideoTrack.replaceTrack(screenShareTrack);
+        }
+
         localVideo.srcObject = stream;
         localStreamRef.current = stream;
         setIsScreenSharing(true);
+
+        //Detecting screen share off
+        screenShareTrack.onended = async () => {
+          setIsScreenSharing(false);
+          const videoCamStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          const videoTrack = videoCamStream.getVideoTracks()[0];
+          const senderTrack = rtc.current
+            ?.getSenders()
+            .find((s) => s.track?.kind === "video");
+
+          if (videoTrack && senderTrack) {
+            await senderTrack.replaceTrack(videoTrack);
+          }
+          localVideo.srcObject = videoCamStream;
+          localStreamRef.current = videoCamStream;
+          setIsVideoSharing(true);
+        };
       } else {
         const localStream = localStreamRef.current;
         if (!localStream) return;
@@ -252,7 +279,11 @@ const Video = () => {
       setStatus("calling");
       playAudio("/sound/ring.mp3", true);
       notify.open({
-        message: <h1 className="font-medium capitalize">{liveActiveSession.fullname}</h1>,
+        message: (
+          <h1 className="font-medium capitalize">
+            {liveActiveSession.fullname}
+          </h1>
+        ),
         description: "Calling...",
         duration: 30,
         onClose: stopAudio,
@@ -267,14 +298,15 @@ const Video = () => {
           </button>,
         ],
       });
-      socket.emit("offer", { offer, to: id,from:session });
+      socket.emit("offer", { offer, to: id, from: session });
     } catch (err) {
       CatchError(err);
     }
   };
 
   const accept = async (payload: OnOfferInterface) => {
-    try {
+    try { 
+      setSdp(null)
       webRtcConnection();
 
       if (!rtc.current) return;
@@ -336,7 +368,9 @@ const Video = () => {
   const onOffer = (payload: OnOfferInterface) => {
     setStatus("incomming");
     notify.open({
-      message: <h1 className="font-medium capitalize">{payload.from.fullname}</h1>,
+      message: (
+        <h1 className="font-medium capitalize">{payload.from.fullname}</h1>
+      ),
       description: "Incomming call...",
       duration: 30,
       placement: "bottomRight",
@@ -413,11 +447,22 @@ const Video = () => {
     };
   }, [status]);
 
+  // useEffect(() => {
+  //   if (!liveActiveSession) {
+  //     endCallFromLocal();
+  //   }
+  // }, [liveActiveSession]);
+
+  //Detect comming offer
   useEffect(()=>{
-    if(!liveActiveSession){
-      endCallFromLocal()
+    if(sdp){
+      notify.destroy()
+      onOffer(sdp)
     }
-  },[liveActiveSession])
+  },[sdp])
+
+  if(!liveActiveSession)
+    navigate("/app")
 
   return (
     <div className="space-y-8">
